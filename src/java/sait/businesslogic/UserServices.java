@@ -7,8 +7,8 @@ package sait.businesslogic;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import sait.dataaccess.UserDB;
+import sait.domainmodel.Role;
 import sait.domainmodel.User;
 
 /**
@@ -19,8 +19,8 @@ public class UserServices {
 
     private UserDB userDB;
 
-    public UserServices(String path) {
-        userDB = new UserDB(path);
+    public UserServices() {
+        userDB = new UserDB();
     }
 
     public User getUser(String username) throws Exception {
@@ -29,36 +29,40 @@ public class UserServices {
     }
     
     public ArrayList<User> getUsers() throws Exception{
-        return (ArrayList<User>) userDB.getAllUsers();
+        return new ArrayList<User>(userDB.getAllUsers());
     }
     public User loging(String username, String password) throws Exception {
 
         User user = userDB.getUser(username);
         if (user != null) {
-            if (!password.equals(user.getPassword())) {
+            if (!password.equals(user.getPassword()) || !user.getActive())
                 user = null;
-            }
         }
         return user;
     }
 
-    public void updatePassword(User user, String newPassword) throws Exception {
+    public boolean updatePassword(User user, String newPassword) throws Exception {
         user.setPassword(newPassword);
-        userDB.update(user);
+        return (userDB.update(user) ==1);
+    }
+    
+    public boolean updateUser(User user) throws Exception {
+          return (userDB.update(user) ==1);
     }
 
-    public boolean addUser(String username, String password) throws IOException, Exception {
-        User user = new User(username, password, false);
-
+    public boolean addUser(String username, String password, String email, String firstName, String lastName) throws IOException, Exception {
+        User user = new User(username, password,email, true,firstName, lastName);
+        Role defRole = userDB.getRole(2);
+        user.setRole(defRole);
+        
         boolean isAdded = true;
 
-        ArrayList<User> users = (ArrayList<User>) userDB.getAllUsers();
+        ArrayList<User> users = new ArrayList<User>(userDB.getAllUsers());
         if (users.indexOf(user) != -1) {
             isAdded = false;
         } else {
-            userDB.addUser(user);
+           isAdded = (userDB.addUser(user) == 1);
         }
-        
         return isAdded;
     }
     
@@ -68,8 +72,20 @@ public class UserServices {
         if(user.getUsername().equals(admin))
             isRemoved = false;
         else
-            userDB.removeUser(user);
+           isRemoved = (userDB.removeUser(user) == 1);
         
+        return isRemoved;
+    }
+    
+        public boolean logicalRemove(User user) throws Exception{
+        boolean isRemoved = true;
+        
+        if(user.getRole().getRoleID() == 1)
+            isRemoved = false;
+        else{
+            user.setActive(false);
+            isRemoved = (userDB.update(user) ==1);
+        }
         return isRemoved;
     }
 }

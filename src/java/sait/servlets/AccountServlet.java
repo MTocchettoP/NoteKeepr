@@ -7,94 +7,139 @@ package sait.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import sait.businesslogic.UserServices;
 import sait.domainmodel.User;
 
 /**
  *
  * @author 733196
  */
-@WebServlet(name = "LogingServlet", urlPatterns = {"/LogingServlet"})
 public class AccountServlet extends HttpServlet {
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         HttpSession sess = request.getSession();
-        
-        String action = request.getParameter("action");
-        if (action != null && action.equals("logout")) {
-            sess.removeAttribute("user");
-            sess.setAttribute("msg", "Sucessfuly logout");            
-            response.sendRedirect("/login");
-            return;
+
+        String username = (String) sess.getAttribute("username");
+        UserServices us = new UserServices();
+        User user = null;
+        try {
+            user = us.getUser(username);
+        } catch (Exception ex) {
+            Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        User user = (User) sess.getAttribute("user");
-        if (user != null) {
-            if (user.getRole().getRoleID() == 1) {//is admin
-                response.sendRedirect("/admin");
-            } else {
-                response.sendRedirect("/notes");
-            }
-            return;
+
+        String edit = (String) sess.getAttribute("edit");
+        if (edit != null) {
+            request.setAttribute("edit", edit);
+            sess.removeAttribute("edit");
         }
-        
+
         String msg = (String) sess.getAttribute("msg");
         if (msg != null) {
-            request.setAttribute("errorMessage", msg);
+            request.setAttribute("msg", msg);
             sess.removeAttribute("msg");
         }
-        getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
-        
+
+        request.setAttribute("user", user);
+        getServletContext().getRequestDispatcher("/WEB-INF/account/viewedit.jsp").forward(request, response);
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        String userName = request.getParameter("username");
-        String password = request.getParameter("password");
-        
-        if (userName == null || userName.isEmpty() || password == null || password.isEmpty()) {
-            request.setAttribute("userName", userName);
-            request.setAttribute("password", password);
-            request.setAttribute("errorMessage", "Please enter both value.");
-            getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
-            return;
-        }
-        UserServices us = new UserServices(getServletContext().getRealPath("/WEB-INF/"));
-        User user = null;
-        try {
-            user = us.loging(userName, password);
-        } catch (Exception ex) {
-            Logger.getLogger(AccountServlet.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        if (user == null) {
-            request.setAttribute("errorMessage", "Username or Password is invalid!");
-            request.setAttribute("userName", userName);
-            request.setAttribute("password", password);
-            getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
-            return;
-        }
-        
+
         HttpSession sess = request.getSession();
-        sess.setAttribute("user", user);
-        if (user.getRole().getRoleID() == 1) {//is admin
-            response.sendRedirect("/admin");
-        } else {
-            response.sendRedirect("/notes");
+        String action = request.getParameter("action");
+
+        if (action != null && action.equals("edit")) {
+            sess.setAttribute("edit", "true");
+            response.sendRedirect("/account");
+            return;
+        }
+
+        if (action != null && action.equals("save")) {
+            editUser(request, response);
+        }
+
+        if (action != null && action.equals("delete")) {
+            logicalDelete(request, response);
         }
     }
-    
+
+    private void logicalDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession sess = request.getSession();
+        UserServices us = new UserServices();
+
+        String username = request.getParameter("username");
+        User user = null;
+        try {
+            user = us.getUser(username);
+        } catch (Exception ex) {
+            Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            if (us.logicalRemove(user)) {
+
+                response.sendRedirect("/login?action=logout");
+            } else {
+                sess.setAttribute("msg", "Admins can't delete their selfs silly");
+                response.sendRedirect("/account");
+                return;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void editUser(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        HttpSession sess = request.getSession();
+        UserServices us = new UserServices();
+
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String email = request.getParameter("email");
+        String firstname = request.getParameter("firstname");
+        String lastname = request.getParameter("lastname");
+
+        if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
+            request.setAttribute("username", username);
+            request.setAttribute("password", password);
+            request.setAttribute("email", email);
+            request.setAttribute("firstname", firstname);
+            request.setAttribute("lastname", lastname);
+            sess.setAttribute("msg", "Please enter all values");
+            sess.setAttribute("edit", "edit");
+            response.sendRedirect("/account");
+            return;
+        }
+
+        try {
+            User user = us.getUser(username);
+            user.setEmail(email);
+            user.setFirstname(firstname);
+            user.setLastname(lastname);
+            user.setPassword(password);
+            if (us.updateUser(user)) {
+                sess.setAttribute("msg", "User updated");
+            } else {
+                sess.setAttribute("msg", "An error has occurred");
+            }
+            response.sendRedirect("/account");
+            return;
+        } catch (Exception ex) {
+            Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

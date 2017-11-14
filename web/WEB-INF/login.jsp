@@ -9,20 +9,20 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Assignment 2</title>
+        <title>Note Keeper</title>
     </head>
     <body>
       
-        <h1>Manage Users Login</h1>
+        <h1>Login</h1>
         <div>
             <form action="login" method="post">
-               Username: <input type="text" name="username" value= ${userName}><br>
-               Password: <input type="password" name="password"  value= ${password}><br>
+               Username: <input type="text" name="username" value="${userName}"><br>
+               Password: <input type="password" name="password"  value="${password}"><br>
                 <input type="submit" value="login">
             </form>
             
         </div>
-        ${errorMessage}
+        ${msg}
         
     </body>
 </html>

@@ -65,7 +65,7 @@ public class AccountServlet extends HttpServlet {
 
         if (action != null && action.equals("edit")) {
             sess.setAttribute("edit", "true");
-            response.sendRedirect("/account");
+            response.sendRedirect("/account/edit");
             return;
         }
 
@@ -121,7 +121,7 @@ public class AccountServlet extends HttpServlet {
             request.setAttribute("lastname", lastname);
             sess.setAttribute("msg", "Please enter all values");
             sess.setAttribute("edit", "edit");
-            response.sendRedirect("/account");
+            response.sendRedirect("/account/edit");
             return;
         }
 

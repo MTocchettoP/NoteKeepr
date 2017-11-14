@@ -46,11 +46,11 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>NotesServlet</servlet-name>
-        <url-pattern>/notes</url-pattern>
+        <url-pattern>/notes/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>AccountServlet</servlet-name>
-        <url-pattern>/account</url-pattern>
+        <url-pattern>/account/*</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

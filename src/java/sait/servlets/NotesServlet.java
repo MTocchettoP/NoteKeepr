@@ -47,6 +47,19 @@ public class NotesServlet extends HttpServlet {
             sess.removeAttribute("msg");
         }
 
+        Note note = (Note) sess.getAttribute("note");
+        if (note != null) {
+            sess.removeAttribute("note");
+            request.setAttribute("note", note);
+            String edit = (String) sess.getAttribute("edit");
+            if (edit != null) {
+                request.setAttribute("edit", edit);
+                sess.removeAttribute("edit");
+            }
+            getServletContext().getRequestDispatcher("/WEB-INF/notes/viewedit.jsp").forward(request, response);
+            return;
+        }
+
         getServletContext().getRequestDispatcher("/WEB-INF/notes/notes.jsp").forward(request, response);
     }
 
@@ -85,8 +98,8 @@ public class NotesServlet extends HttpServlet {
     }
 
     private void deleteNote(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
-        checkOwnership(request,response);
+
+        checkOwnership(request, response);
         HttpSession sess = request.getSession();
         NoteService ns = new NoteService();
         int noteID = Integer.parseInt(request.getParameter("selectedNoteID"));
@@ -94,13 +107,11 @@ public class NotesServlet extends HttpServlet {
         try {
             if (ns.delete(noteID)) {
                 sess.setAttribute("msg", "Note deleted");
-                response.sendRedirect("/notes");
-                return;
             } else {
                 sess.setAttribute("msg", "Error trying to delete note");
-                response.sendRedirect("/notes");
-                return;
             }
+            response.sendRedirect("/notes");
+            return;
         } catch (Exception ex) {
             Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -124,7 +135,7 @@ public class NotesServlet extends HttpServlet {
             request.setAttribute("title", title);
             request.setAttribute("contents", contents);
             sess.setAttribute("msg", "Please enter all values");
-            getServletContext().getRequestDispatcher("/WEB-INF/notes.jsp").forward(request, response);
+            getServletContext().getRequestDispatcher("/WEB-INF/notes/notes.jsp").forward(request, response);
             return;
         }
 
@@ -145,7 +156,8 @@ public class NotesServlet extends HttpServlet {
     }
 
     private void editNote(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        checkOwnership(request,response);
+        checkOwnership(request, response);
+        HttpSession sess = request.getSession();
         NoteService ns = new NoteService();
         int noteID = Integer.parseInt(request.getParameter("selectedNoteID"));
         Note note = null;
@@ -154,24 +166,26 @@ public class NotesServlet extends HttpServlet {
         } catch (Exception ex) {
             Logger.getLogger(NotesServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        request.setAttribute("note", note);
-        request.setAttribute("edit", "true");
-        getServletContext().getRequestDispatcher("/WEB-INF/notes/viewedit.jsp").forward(request, response);
+
+        sess.setAttribute("edit", "true");
+        sess.setAttribute("note", note);
+        response.sendRedirect("/notes/edit");
     }
 
     private void viewNote(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        checkOwnership(request,response);
+        checkOwnership(request, response);
+        HttpSession sess = request.getSession();
         NoteService ns = new NoteService();
         int noteID = Integer.parseInt(request.getParameter("selectedNoteID"));
-        
+
         Note note = null;
         try {
             note = ns.get(noteID);
         } catch (Exception ex) {
             Logger.getLogger(NotesServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        request.setAttribute("note", note);
-        getServletContext().getRequestDispatcher("/WEB-INF/notes/viewedit.jsp").forward(request, response);
+        sess.setAttribute("note", note);
+        response.sendRedirect("/notes/view");
     }
 
     private void saveNote(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -180,10 +194,9 @@ public class NotesServlet extends HttpServlet {
         String contents = request.getParameter("contents");
         String title = request.getParameter("title");
         NoteService ns = new NoteService();
-     
-        checkOwnership(request,response);
 
-        
+        checkOwnership(request, response);
+
         if (contents == null || contents.isEmpty() || title == null || title.isEmpty()) {
             Note note = null;
             try {
@@ -200,25 +213,22 @@ public class NotesServlet extends HttpServlet {
         try {
             if (ns.update(noteID, contents, title)) {
                 sess.setAttribute("msg", "Note updated");
-                response.setStatus(307);//cool hacks are cool, allows redirect with post
-                response.addHeader("Location", "/notes?action=view");
-                return;
             } else {
                 sess.setAttribute("msg", "An error has occurred");
-                response.setStatus(307);
-                response.addHeader("Location", "/notes?action=view");
-                return;
             }
+            response.setStatus(307);//cool hacks are cool, allows redirect with post
+            response.addHeader("Location", "/notes?action=view");
+            return;
         } catch (Exception ex) {
             Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    private void checkOwnership(HttpServletRequest request, HttpServletResponse response) throws IOException{
+    private void checkOwnership(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession sess = request.getSession();
         int noteID = Integer.parseInt(request.getParameter("selectedNoteID"));
         NoteService ns = new NoteService();
-     
+
         String username = (String) sess.getAttribute("username");
         UserServices us = new UserServices();
         User user = null;

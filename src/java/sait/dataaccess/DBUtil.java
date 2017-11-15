@@ -10,7 +10,7 @@ import javax.persistence.Persistence;
 
 /**
  *
- * @author 733196
+ * @author 733196/
  */
 public class DBUtil {
     private static final EntityManagerFactory emf =

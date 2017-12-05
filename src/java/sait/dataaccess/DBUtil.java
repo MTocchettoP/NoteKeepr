@@ -13,11 +13,15 @@ import javax.persistence.Persistence;
  * @author 733196/
  */
 public class DBUtil {
-    private static final EntityManagerFactory emf =
-            Persistence.createEntityManagerFactory("NotesKeeperPU");
+
+    private static final EntityManagerFactory emf
+            = Persistence.createEntityManagerFactory("NotesKeeperPU");
 
     public static EntityManagerFactory getEmFactory() {
         return emf;
     }
 
+    public static void close() {
+        emf.close();
+    }
 }

@@ -8,6 +8,10 @@
         <filter-name>AdminFilter</filter-name>
         <filter-class>sait.businesslogic.filters.AdminFilter</filter-class>
     </filter>
+    <filter>
+        <filter-name>ManagerFilter</filter-name>
+        <filter-class>sait.businesslogic.filters.ManagerFilter</filter-class>
+    </filter>
     <filter-mapping>
         <filter-name>AccessFilter</filter-name>
         <servlet-name>NotesServlet</servlet-name>
@@ -21,8 +25,16 @@
         <servlet-name>AccountServlet</servlet-name>
     </filter-mapping>
     <filter-mapping>
+        <filter-name>AccessFilter</filter-name>
+        <servlet-name>ManagerServlet</servlet-name>
+    </filter-mapping>
+    <filter-mapping>
         <filter-name>AdminFilter</filter-name>
         <servlet-name>AdminServlet</servlet-name>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>ManagerFilter</filter-name>
+        <servlet-name>ManagerServlet</servlet-name>
     </filter-mapping>
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
@@ -40,6 +52,22 @@
         <servlet-name>AccountServlet</servlet-name>
         <servlet-class>sait.servlets.AccountServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>sait.servlets.RegisterServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagerServlet</servlet-name>
+        <servlet-class>sait.servlets.ManagerServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CompanyServlet</servlet-name>
+        <servlet-class>sait.servlets.CompanyServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ForgotPasswordServlet</servlet-name>
+        <servlet-class>sait.servlets.ForgotPasswordServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
@@ -56,6 +84,22 @@
         <servlet-name>AccountServlet</servlet-name>
         <url-pattern>/account/*</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/register/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerServlet</servlet-name>
+        <url-pattern>/employees/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CompanyServlet</servlet-name>
+        <url-pattern>/companies/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ForgotPasswordServlet</servlet-name>
+        <url-pattern>/forgot/*</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>
             30
@@ -64,4 +108,14 @@
     <welcome-file-list>
         <welcome-file>login</welcome-file>
     </welcome-file-list>
+    <env-entry>
+        <env-entry-name>webmail-username</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>saitdbtest@gmail.com</env-entry-value>
+    </env-entry>
+    <env-entry>
+        <env-entry-name>webmail-password</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>saitdb123</env-entry-value>
+    </env-entry>
 </web-app>

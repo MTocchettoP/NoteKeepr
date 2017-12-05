@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import sait.domainmodel.Company;
 import sait.domainmodel.Role;
 import sait.domainmodel.User;
 
@@ -71,10 +72,13 @@ public class UserDB {
 
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction trans = em.getTransaction();
+        Company comp = newUser.getCompany();
+        comp.getUserCollection().add(newUser);
 
         try {
             trans.begin();
-            em.persist(newUser);
+            em.merge(newUser);
+            em.merge(comp);
             trans.commit();
             return 1;
         } catch (Exception ex) {
@@ -89,9 +93,12 @@ public class UserDB {
     public int removeUser(User user) throws Exception {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction trans = em.getTransaction();
+        Company comp = user.getCompany();
+        comp.getUserCollection().remove(user);
 
         try {
             trans.begin();
+            em.merge(comp);
             em.remove(em.merge(user));
             trans.commit();
             return 1;
@@ -112,6 +119,20 @@ public class UserDB {
         } catch (Exception ex) {
             Logger.getLogger(UserDB.class.getName()).log(Level.SEVERE, "Cannot get role", ex);
             throw new NotesDBException("Error getting role");
+        } finally {
+            em.close();
+        }
+    }
+
+    public Company getCompany(String company) throws NotesDBException {
+       EntityManager em = DBUtil.getEmFactory().createEntityManager();
+
+        try {
+            Company comp = em.find(Company.class, Integer.parseInt(company));
+            return comp;
+        } catch (Exception ex) {
+            Logger.getLogger(UserDB.class.getName()).log(Level.SEVERE, "Cannot get company", ex);
+            throw new NotesDBException("Error getting company");
         } finally {
             em.close();
         }

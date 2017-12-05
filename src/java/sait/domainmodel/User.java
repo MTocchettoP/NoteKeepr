@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -34,6 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     , @NamedQuery(name = "User.findByPassword", query = "SELECT u FROM User u WHERE u.password = :password")
     , @NamedQuery(name = "User.findByEmail", query = "SELECT u FROM User u WHERE u.email = :email")
     , @NamedQuery(name = "User.findByActive", query = "SELECT u FROM User u WHERE u.active = :active")
+    , @NamedQuery(name = "User.findByRegistered", query = "SELECT u FROM User u WHERE u.registered = :registered")
     , @NamedQuery(name = "User.findByFirstname", query = "SELECT u FROM User u WHERE u.firstname = :firstname")
     , @NamedQuery(name = "User.findByLastname", query = "SELECT u FROM User u WHERE u.lastname = :lastname")})
 public class User implements Serializable {
@@ -53,6 +55,9 @@ public class User implements Serializable {
     @Column(name = "Active")
     private boolean active;
     @Basic(optional = false)
+    @Column(name = "Registered")
+    private boolean registered;
+    @Basic(optional = false)
     @Column(name = "Firstname")
     private String firstname;
     @Basic(optional = false)
@@ -60,6 +65,13 @@ public class User implements Serializable {
     private String lastname;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
     private Collection<Note> noteCollection;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userID")
+    private Collection<PasswordChangeRequest> passwordChangeRequestCollection;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    private AwaitingRegistration awaitingRegistration;
+    @JoinColumn(name = "Company", referencedColumnName = "CompanyID")
+    @ManyToOne(optional = false)
+    private Company company;
     @JoinColumn(name = "Role", referencedColumnName = "RoleID")
     @ManyToOne(optional = false)
     private Role role;
@@ -71,11 +83,12 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    public User(String username, String password, String email, boolean active, String firstname, String lastname) {
+    public User(String username, String password, String email, boolean active, boolean registered, String firstname, String lastname) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.active = active;
+        this.registered = registered;
         this.firstname = firstname;
         this.lastname = lastname;
     }
@@ -112,6 +125,14 @@ public class User implements Serializable {
         this.active = active;
     }
 
+    public boolean getRegistered() {
+        return registered;
+    }
+
+    public void setRegistered(boolean registered) {
+        this.registered = registered;
+    }
+
     public String getFirstname() {
         return firstname;
     }
@@ -135,6 +156,31 @@ public class User implements Serializable {
 
     public void setNoteCollection(Collection<Note> noteCollection) {
         this.noteCollection = noteCollection;
+    }
+
+    @XmlTransient
+    public Collection<PasswordChangeRequest> getPasswordChangeRequestCollection() {
+        return passwordChangeRequestCollection;
+    }
+
+    public void setPasswordChangeRequestCollection(Collection<PasswordChangeRequest> passwordChangeRequestCollection) {
+        this.passwordChangeRequestCollection = passwordChangeRequestCollection;
+    }
+
+    public AwaitingRegistration getAwaitingRegistration() {
+        return awaitingRegistration;
+    }
+
+    public void setAwaitingRegistration(AwaitingRegistration awaitingRegistration) {
+        this.awaitingRegistration = awaitingRegistration;
+    }
+
+    public Company getCompany() {
+        return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public Role getRole() {

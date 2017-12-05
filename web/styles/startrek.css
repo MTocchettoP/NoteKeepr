@@ -1,0 +1,17 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Nov 30, 2017, 1:54:04 PM
+    Author     : 733196
+*/
+
+body{
+    background-color: cyan;
+    background-image: url('https://seeklogo.com/images/S/Star_Trek_-_Original_Series_-_Command_Insignia-logo-215DB7F38D-seeklogo.com.png');
+    background-repeat: no-repeat;
+    background-position: center; 
+}
+

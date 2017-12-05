@@ -1,0 +1,5 @@
+<c:forTokens items="${pageContext.request.serverName}" delims="." var="dom" begin="0" end="0">
+    <c:set var = "domain"  value = "${dom}"/>
+    
+</c:forTokens>
+<link rel="stylesheet" href="<c:url value='styles/${domain}.css' />" />

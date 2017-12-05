@@ -7,14 +7,19 @@ package sait.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.PageContext;
+import sait.businesslogic.CompanyService;
 import sait.businesslogic.UserServices;
+import sait.domainmodel.Company;
 import sait.domainmodel.User;
 
 /**
@@ -29,9 +34,10 @@ public class AdminServlet extends HttpServlet {
 
         HttpSession sess = request.getSession();
         sess.setAttribute("uri", "/users");
-        sess.setAttribute("admin", "true");
+        sess.setAttribute("admin", "true");//used to enable the Note link on the header
+        sess.setAttribute("sysadmin", "true");//used to enable the company link on the header
         UserServices us = new UserServices();
-
+        
         String msg = (String) sess.getAttribute("msg");
         if (msg != null) {
             request.setAttribute("msg", msg);
@@ -40,7 +46,7 @@ public class AdminServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         if (action != null && action.equals("back")) {
-            request.setAttribute("msg", "Action canceled");
+            request.setAttribute("msg", "err.actionCanceled");
         }
 
         try {
@@ -58,6 +64,13 @@ public class AdminServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if (action != null && action.equals("add")) {
+            CompanyService cs = new CompanyService();
+            try {
+                List<Company> companies = cs.getAll();
+                request.setAttribute("companies", companies);
+            } catch (Exception ex) {
+                Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
             getServletContext().getRequestDispatcher("/WEB-INF/admin/addedit.jsp").forward(request, response);
             return;
         }
@@ -71,6 +84,13 @@ public class AdminServlet extends HttpServlet {
         }
 
         if (action != null && action.equals("edit")) {
+            CompanyService cs = new CompanyService();
+            try {
+                List<Company> companies = cs.getAll();
+                request.setAttribute("companies", companies);
+            } catch (Exception ex) {
+                Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
             String username = request.getParameter("selectedUser");
             UserServices us = new UserServices();
             User user = null;
@@ -100,25 +120,28 @@ public class AdminServlet extends HttpServlet {
         String email = request.getParameter("email");
         String firstname = request.getParameter("firstname");
         String lastname = request.getParameter("lastname");
-
+        String company = request.getParameter("company");
         if (username == null || username.isEmpty() || password == null || password.isEmpty()
                 || email == null || email.isEmpty() || firstname == null || firstname.isEmpty()
-                || lastname == null || lastname.isEmpty()) {
+                || lastname == null || lastname.isEmpty()
+                || company == null || company.isEmpty()) {
             request.setAttribute("username", username);
             request.setAttribute("password", password);
             request.setAttribute("email", email);
             request.setAttribute("firstname", firstname);
             request.setAttribute("lastname", lastname);
-            sess.setAttribute("msg", "Please enter all values");
+            request.setAttribute("company", company);
+            sess.setAttribute("msg", "err.missingvalue");
             getServletContext().getRequestDispatcher("/WEB-INF/admin/addedit.jsp").forward(request, response);
             return;
         }
 
         try {
-            if (us.addUser(username, password, email, firstname, lastname)) {
-                sess.setAttribute("msg", "New user added!");
+            String path = getServletContext().getRealPath("/WEB-INF");
+            if (us.addUser(username, password, email, firstname, lastname, company,path)) {
+                sess.setAttribute("msg", "err.confEmailSent");
             } else {
-                sess.setAttribute("msg", "Username already in use, please chose another one");
+                sess.setAttribute("msg", "err.UserAlreadyExist");
             }
             response.sendRedirect("/users");
             return;
@@ -149,9 +172,9 @@ public class AdminServlet extends HttpServlet {
 
         try {
             if (us.removeUser(user, admin.getUsername())) {
-                sess.setAttribute("msg", "User deleted");
+                sess.setAttribute("msg", "err.userDeleted");
             } else {
-                sess.setAttribute("msg", "You can't delete yourself silly");
+                sess.setAttribute("msg", "err.acc.adminnono");
             }
             response.sendRedirect("/users");
             return;
@@ -170,6 +193,7 @@ public class AdminServlet extends HttpServlet {
         String firstname = request.getParameter("firstname");
         String lastname = request.getParameter("lastname");
         String active = request.getParameter("active");
+        String company = request.getParameter("company");
         boolean isActive = false;
         if (active != null) {
             isActive = true;
@@ -178,28 +202,32 @@ public class AdminServlet extends HttpServlet {
         if (username == null || username.isEmpty() || password == null || password.isEmpty()
                 || email == null || email.isEmpty()
                 || firstname == null || firstname.isEmpty()
-                || lastname == null || lastname.isEmpty()) {
+                || lastname == null || lastname.isEmpty()
+                || company == null || company.isEmpty()) {
             request.setAttribute("username", username);
             request.setAttribute("password", password);
             request.setAttribute("email", email);
             request.setAttribute("firstname", firstname);
             request.setAttribute("lastname", lastname);
-            sess.setAttribute("msg", "Please enter all values");
+            request.setAttribute("company", company);
+            sess.setAttribute("msg", "err.missingvalue");
             getServletContext().getRequestDispatcher("/WEB-INF/admin/addedit.jsp").forward(request, response);
             return;
         }
 
         try {
             User user = us.getUser(username);
+            Company comp = new CompanyService().get(company);
             user.setEmail(email);
             user.setFirstname(firstname);
             user.setLastname(lastname);
             user.setPassword(password);
             user.setActive(isActive);
+            user.setCompany(comp);
             if (us.updateUser(user)) {
-                sess.setAttribute("msg", "User updated");
+                sess.setAttribute("msg", "err.userUpdated");
             } else {
-                sess.setAttribute("msg", "An error has occurred");
+                sess.setAttribute("msg", "err.unknown");
             }
 
             response.sendRedirect("/users");

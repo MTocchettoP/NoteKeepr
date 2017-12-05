@@ -94,7 +94,7 @@ public class AccountServlet extends HttpServlet {
 
                 response.sendRedirect("/login?action=logout");
             } else {
-                sess.setAttribute("msg", "Admins can't delete their selfs silly");
+                sess.setAttribute("msg", "err.acc.adminnono");
                 response.sendRedirect("/account");
                 return;
             }
@@ -119,7 +119,7 @@ public class AccountServlet extends HttpServlet {
             request.setAttribute("email", email);
             request.setAttribute("firstname", firstname);
             request.setAttribute("lastname", lastname);
-            sess.setAttribute("msg", "Please enter all values");
+            sess.setAttribute("msg", "err.missingvalue");
             sess.setAttribute("edit", "edit");
             response.sendRedirect("/account/edit");
             return;
@@ -132,9 +132,9 @@ public class AccountServlet extends HttpServlet {
             user.setLastname(lastname);
             user.setPassword(password);
             if (us.updateUser(user)) {
-                sess.setAttribute("msg", "User updated");
+                sess.setAttribute("msg", "err.userUpdated");
             } else {
-                sess.setAttribute("msg", "An error has occurred");
+                sess.setAttribute("msg", "err.unknown");
             }
             response.sendRedirect("/account");
             return;

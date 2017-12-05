@@ -6,6 +6,10 @@
     <class>sait.domainmodel.Note</class>
     <class>sait.domainmodel.Role</class>
     <class>sait.domainmodel.User</class>
+    <class>domainmodel.PasswordChangeRequest</class>
+    <class>sait.domainmodel.PasswordChangeRequest</class>
+    <class>sait.domainmodel.Company</class>
+    <class>sait.domainmodel.AwaitingRegistration</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
   </persistence-unit>
 </persistence>

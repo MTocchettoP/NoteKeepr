@@ -106,9 +106,9 @@ public class NotesServlet extends HttpServlet {
 
         try {
             if (ns.delete(noteID)) {
-                sess.setAttribute("msg", "Note deleted");
+                sess.setAttribute("msg", "err.noteDelete");
             } else {
-                sess.setAttribute("msg", "Error trying to delete note");
+                sess.setAttribute("msg", "err.unknown");
             }
             response.sendRedirect("/notes");
             return;
@@ -134,18 +134,18 @@ public class NotesServlet extends HttpServlet {
         if (title == null || title.isEmpty() || contents == null || contents.isEmpty()) {
             request.setAttribute("title", title);
             request.setAttribute("contents", contents);
-            sess.setAttribute("msg", "Please enter all values");
+            sess.setAttribute("msg", "err.missingvalue");
             getServletContext().getRequestDispatcher("/WEB-INF/notes/notes.jsp").forward(request, response);
             return;
         }
 
         try {
             if (ns.insert(title, contents, user)) {
-                sess.setAttribute("msg", "New note added!");
+                sess.setAttribute("msg", "err.noteAdded");
                 response.sendRedirect("/notes");
                 return;
             } else {
-                sess.setAttribute("msg", "Error adding note");
+                sess.setAttribute("msg", "err.unknown");
                 response.sendRedirect("/notes");
                 return;
             }
@@ -205,16 +205,16 @@ public class NotesServlet extends HttpServlet {
                 Logger.getLogger(NotesServlet.class.getName()).log(Level.SEVERE, null, ex);
             }
             request.setAttribute("note", note);
-            sess.setAttribute("msg", "Please enter all values");
+            sess.setAttribute("msg", "err.missingvalue");
             getServletContext().getRequestDispatcher("/WEB-INF/notes/viewedit.jsp").forward(request, response);
             return;
         }
 
         try {
             if (ns.update(noteID, contents, title)) {
-                sess.setAttribute("msg", "Note updated");
+                sess.setAttribute("msg", "err.noteUpdated");
             } else {
-                sess.setAttribute("msg", "An error has occurred");
+                sess.setAttribute("msg", "err.missingvalue");
             }
             response.setStatus(307);//cool hacks are cool, allows redirect with post
             response.addHeader("Location", "/notes?action=view");
@@ -239,7 +239,7 @@ public class NotesServlet extends HttpServlet {
         }
         boolean hasOwnership = ns.hasNoteOwnership(user, noteID);
         if (!hasOwnership) {
-            sess.setAttribute("msg", "You do not own this note, stop spoofing my app");
+            sess.setAttribute("msg", "err.noteOwnership");
             response.sendRedirect("/notes");
             return;
         }

@@ -25,43 +25,44 @@ import sait.domainmodel.User;
  */
 @WebServlet(name = "LogingServlet", urlPatterns = {"/LogingServlet"})
 public class LoginServlet extends HttpServlet {
-    
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         HttpSession sess = request.getSession();
-        
-        
-        
+
         String action = request.getParameter("action");
         if (action != null && action.equals("logout")) {
             sess.invalidate();
             sess = request.getSession();
-            sess.setAttribute("msg", "Sucessfuly logout");           
+            sess.setAttribute("msg", "err.logout");
             response.sendRedirect("/login");
             return;
         }
-        
-        String username =  (String) sess.getAttribute("username");
+
+        String username = (String) sess.getAttribute("username");
         UserServices us = new UserServices();
         User user = null;
         try {
-            if(username != null)
+            if (username != null) {
                 user = us.getUser(username);
+            }
         } catch (Exception ex) {
             Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         if (user != null) {
             if (user.getRole().getRoleID() == 1) {//is admin
                 response.sendRedirect("/users");
+            } else if (user.getRole().getRoleID() == 3) {//is manager
+                response.sendRedirect("/employees");
             } else {
                 response.sendRedirect("/notes");
             }
             return;
         }
-        
+
         String msg = (String) sess.getAttribute("msg");
         if (msg != null) {
             request.setAttribute("msg", msg);
@@ -69,20 +70,20 @@ public class LoginServlet extends HttpServlet {
         }
         
         getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
-        
+
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String username = request.getParameter("username");
         String password = request.getParameter("password");
-        
+
         if (username == null || username.isEmpty() || password == null || password.isEmpty()) {
             request.setAttribute("userName", username);
             request.setAttribute("password", password);
-            request.setAttribute("msg", "Please enter both value.");
+            request.setAttribute("msg","err.missingvalue");
             getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
             return;
         }
@@ -93,22 +94,25 @@ public class LoginServlet extends HttpServlet {
         } catch (Exception ex) {
             Logger.getLogger(LoginServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         if (user == null) {
-            request.setAttribute("msg", "Username or Password is invalid!");
+            request.setAttribute("msg", "err.invalidLogin");
             request.setAttribute("userName", username);
             request.setAttribute("password", password);
             getServletContext().getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
             return;
         }
-        
+
         HttpSession sess = request.getSession();
         sess.setAttribute("username", username);
+        sess.setAttribute("uName", user.getFirstname());
         if (user.getRole().getRoleID() == 1) {//is admin
             response.sendRedirect("/users");
+        } else if (user.getRole().getRoleID() == 3) {//is manager
+            response.sendRedirect("/employees");
         } else {
             response.sendRedirect("/notes");
         }
     }
-    
+
 }

@@ -104,7 +104,7 @@ public class RegisterServlet extends HttpServlet {
             request.setAttribute("company", company);
             request.setAttribute("msg", "err.missingvalue");
             getServletContext().getRequestDispatcher("/WEB-INF/account/register.jsp").forward(request, response);
-            return;
+           // return;
         }
 
         try {
@@ -121,10 +121,8 @@ public class RegisterServlet extends HttpServlet {
                 request.setAttribute("lastname", lastname);
                 request.setAttribute("company", company);
                 getServletContext().getRequestDispatcher("/WEB-INF/account/register.jsp").forward(request, response);
-                return;
+                //return;
             }
-
-            return;
         } catch (Exception ex) {
             Logger.getLogger(AdminServlet.class.getName()).log(Level.SEVERE, null, ex);
         }

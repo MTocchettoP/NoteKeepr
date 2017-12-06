@@ -28,5 +28,8 @@
             <input type="submit" value="<fmt:message key="register.button.register" />">     
             <input type="hidden" name="action" value="register">
         </form>
+         <c:if test="${msg != null}">
+              <fmt:message key="${msg}" />  
+         </c:if>
     </body>
 </html>

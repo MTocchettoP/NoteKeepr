@@ -59,21 +59,23 @@ public class UserServices {
 
     public boolean addUser(String username, String password, String email, String firstName, String lastName, String company, String path) throws IOException, Exception {
         User user = new User(username, password, email, true,false, firstName, lastName);
+        
+        ArrayList<User> users = new ArrayList<User>(userDB.getAllUsers());
+        for(User u : users){
+            if(u.getUsername().equals(username))
+                return false;
+        }
+        
         Role defRole = userDB.getRole(2);
         Company comp = userDB.getCompany(company);
         user.setRole(defRole);
         user.setCompany(comp);
 
-        boolean isAdded = true;
-
-        ArrayList<User> users = new ArrayList<User>(userDB.getAllUsers());
-        if (users.indexOf(user) != -1) {
-            isAdded = false;
-        } else {
-            AwaitingService as = new AwaitingService();
-            as.startRegistration(email, user, path);
-        }
-        return isAdded;
+        
+        AwaitingService as = new AwaitingService();
+        as.startRegistration(email, user, path);
+    
+        return true;
     }
 
     public boolean removeUser(User user, String admin) throws Exception {

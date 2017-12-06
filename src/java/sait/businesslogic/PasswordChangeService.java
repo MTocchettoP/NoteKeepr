@@ -74,7 +74,7 @@ public class PasswordChangeService {
     private void sendRetrievalEmail(User user, String uuid, String path) {
         WebMailService wms = new WebMailService();
         HashMap<String,String> content = new HashMap<String,String>();
-        content.put("link", "http://localhost:8084/forgot?ret=" + uuid);
+        content.put("link", "cprg352notekeepr2017.tk/forgot?ret=" + uuid);
         path = path+ "/emailtemplates/retrieveLink.html";
         
         try {

@@ -60,7 +60,7 @@ public class AwaitingService {
     private void sendRegistrationEmail(User user, String uuid, String path) {
         WebMailService wms = new WebMailService();
         HashMap<String,String> content = new HashMap<String,String>();
-        content.put("link", "http://localhost:8084/register?complete=" + uuid);
+        content.put("link", "cprg352notekeepr2017.tk/register?complete=" + uuid);
         path = path+ "/emailtemplates/completeregistration.html";
         
         try {
